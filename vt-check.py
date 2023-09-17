@@ -8,6 +8,7 @@ import argparse
 
 api_key="XXXXXXXXXXXXXXXXXX" #INSERT API-KEY HERE
 
+
 def check_masshashes(tobehashed,path): #function for checking txt-file with multiple hashes
  with open(tobehashed, 'r') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter='\n')
@@ -28,18 +29,16 @@ def check_masshashes(tobehashed,path): #function for checking txt-file with mult
         print("\ndone. Check your results at {}".format(path))
 
 
-
 def hash_file(tobehashed):
     hash_md5 = hashlib.md5()
     with open(tobehashed, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
-        print (hash_md5.hexdigest())
+        print("MD5 Hash:  {}" . format(hash_md5.hexdigest()))
         return hash_md5.hexdigest()
 
 
 def vt_upload(upload):
-    
     params = {'apikey': api_key}
     print("\nuploading file,  please wait\n")
     files = {'file': (upload, open(upload, 'rb')) }
@@ -52,6 +51,7 @@ def vt_upload(upload):
 
 
 def vt_getresult(hashes):
+  # print(api_key)
   headers = {
     "Accept-Encoding": "gzip, deflate",
     "User-Agent" : "gzip,  My Python requests library example client or username"
@@ -59,17 +59,21 @@ def vt_getresult(hashes):
   params = {'apikey': api_key , 'resource':hashes}
   response = requests.post('https://www.virustotal.com/vtapi/v2/file/report', params=params , headers=headers)
   json_response = response.json()
-
+  # json_formatted_str = json.dumps(json_response, indent=2)
+  # print(json_formatted_str)
   return json_response
+
 
 def printresult(hash):
   getresult = vt_getresult(hash)
-  print("\nMD5 HASH:{}" .format(getresult.get('md5')))
-  if sys.argv[2] != hash:
-    print ("origin file name: {}".format(sys.argv[2]))
-  print("last scanned: {}" .format(getresult.get('scan_date')))
-  print("score:{}/{}".format(getresult.get('positives'),getresult.get('total')))
-  print("link.: {} \n".format(getresult.get('permalink') ))
+  print("-------------------------------------------------------------")
+  print("MD5:       {}"    . format(getresult.get('md5')))
+  print("SHA-1:     {}"    . format(getresult.get('sha1')))
+  print("SHA-256:   {}"    . format(getresult.get('sha256')))
+  print("Scan Date: {}"    . format(getresult.get('scan_date')))
+  print("Score:     {}/{}" . format(getresult.get('positives'),getresult.get('total')))
+  print("-------------------------------------------------------------")
+  print("\n{}\n"           . format(getresult.get('permalink') ))
   return getresult
 
 
@@ -98,23 +102,33 @@ def main():
         epilog="Developed by {} on {}".format(", ".join(__authors__), __date__)
     )
 
+    parser.add_argument("--apikey",help= "specify the API-KEY from www.virustotal.com")
+
     parser.add_argument("--hash", help="checks hash at VT")
-    parser.add_argument("--upload", help="uploads file to VT for scanning (NOT SUITABLE FOR CONFIDENTIAL STUFF!)")
+    # parser.add_argument("--upload", help="uploads file to VT for scanning (NOT SUITABLE FOR CONFIDENTIAL STUFF!)")
     parser.add_argument("--file", help=" hashes file and checks hash at VT")
     parser.add_argument("--mass", help=" reads multiple hashes out of a txt file and checks them at VT , needs --output for results")
     parser.add_argument("--output",help= "specify outputpath for mass-check")
 
     args = parser.parse_args()
 
+    if args.apikey:
+        global api_key
+        api_key = args.apikey
+
     if args.mass and args.output:
         check_masshashes(args.mass,args.output)
     elif args.mass:
         print("please use --output for output-file")
+
     if args.hash:
         printresult(args.hash)
-    if args.upload:
-         vt_upload(args.upload)
+
+    # if args.upload:
+    #      vt_upload(args.upload)
+
     if args.file:
+        print ("File Path: {}".format(args.file))
         printresult(hash_file(args.file))
     
   
