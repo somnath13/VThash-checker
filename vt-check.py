@@ -34,7 +34,7 @@ def hash_file(tobehashed):
     with open(tobehashed, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
-        print("MD5 Hash:  {}" . format(hash_md5.hexdigest()))
+        print("MD5 Hash:    {}" . format(hash_md5.hexdigest()))
         return hash_md5.hexdigest()
 
 
@@ -51,30 +51,31 @@ def vt_upload(upload):
 
 
 def vt_getresult(hashes):
-  # print(api_key)
-  headers = {
-    "Accept-Encoding": "gzip, deflate",
-    "User-Agent" : "gzip,  My Python requests library example client or username"
-    }
-  params = {'apikey': api_key , 'resource':hashes}
-  response = requests.post('https://www.virustotal.com/vtapi/v2/file/report', params=params , headers=headers)
-  json_response = response.json()
-  # json_formatted_str = json.dumps(json_response, indent=2)
-  # print(json_formatted_str)
-  return json_response
+    # print(api_key)
+    headers = {
+        "Accept-Encoding": "gzip, deflate",
+        "User-Agent" : "gzip,  My Python requests library example client or username"
+        }
+    params = {'apikey': api_key , 'resource':hashes}
+    response = requests.post('https://www.virustotal.com/vtapi/v2/file/report', params=params , headers=headers)
+    json_response = response.json()
+    # json_formatted_str = json.dumps(json_response, indent=2)
+    # print(json_formatted_str)
+    return json_response
 
 
 def printresult(hash):
-  getresult = vt_getresult(hash)
-  print("-------------------------------------------------------------")
-  print("MD5:       {}"    . format(getresult.get('md5')))
-  print("SHA-1:     {}"    . format(getresult.get('sha1')))
-  print("SHA-256:   {}"    . format(getresult.get('sha256')))
-  print("Scan Date: {}"    . format(getresult.get('scan_date')))
-  print("Score:     {}/{}" . format(getresult.get('positives'),getresult.get('total')))
-  print("-------------------------------------------------------------")
-  print("\n{}\n"           . format(getresult.get('permalink') ))
-  return getresult
+    getresult = vt_getresult(hash)
+    print("\nVirusTotal Report:")
+    print("--------------------------------------------------------------------------------")
+    print("MD5:         {}"    . format(getresult.get('md5')))
+    print("SHA1:        {}"    . format(getresult.get('sha1')))
+    print("SHA256:      {}"    . format(getresult.get('sha256')))
+    print("Last Scan:   {}"    . format(getresult.get('scan_date')))
+    print("VT Score:    {}/{}" . format(getresult.get('positives'),getresult.get('total')))
+    print("--------------------------------------------------------------------------------")
+    print("\n{}\n"           . format(getresult.get('permalink') ))
+    return getresult
 
 
 def progressbar():
@@ -128,7 +129,7 @@ def main():
     #      vt_upload(args.upload)
 
     if args.file:
-        print ("File Path: {}".format(args.file))
+        # print ("File Path:   {}".format(args.file))
         printresult(hash_file(args.file))
     
   
